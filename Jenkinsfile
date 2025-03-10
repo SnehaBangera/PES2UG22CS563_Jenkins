@@ -2,39 +2,53 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone repository') {
+        stage('Checkout') {
             steps {
-                checkout([$class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    userRemoteConfigs: [[url: 'https://github.com/SnehaBangera/PES2UG22CS563_Jenkins']]
-                ])
+                checkout scm
             }
         }
-
+        
         stage('Build') {
             steps {
-                build 'PES2UG22CS563-1'
-                g++ main/hello.cpp -o output'
-
+                script {
+                    sh 'g++ -o PES2UG22CS563-1 hello.cpp'
+                }
             }
         }
 
         stage('Test') {
             steps {
-                sh './output'
+                script {
+                    sh './PES2UG22CS563-1'
+                }
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'deploy'
+                script {
+                    sh 'git config --global user.name "sneha"'
+                    sh 'git config --global user.email "guddirn07@gmail.com"'
+                    sh 'git checkout main'
+                    sh 'git add -A'
+                    sh 'git commit -m "Added hello.cpp file" || echo "No changes to commit"'
+                }
+            }
+        }
+
+        stage('Post Actions') {
+            steps {
+                echo "Pipeline completed successfully"
             }
         }
     }
 
     post {
-        failure {
-            error 'Pipeline failed'
+        success {
+            echo "Build and deployment successful!"
         }
-    }
+        failure {
+            echo "Pipeline failed"
+        }
+    }
 }
